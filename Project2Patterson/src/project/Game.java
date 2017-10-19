@@ -38,26 +38,24 @@ public class Game {
 	public Scanner getScanner() {
 		return s;
 	}
-	
+
 	public int getNumMoves() {
 		return numMoves;
 	}
-	
+
 	public String getMode() {
 		return mode;
 	}
-	
+
 	public Game() {
 		board = new Board();
 		s = new Scanner(System.in);
 	}
-	
+
 	/*
-	public Game(Player first, Player second) {
-		board = new Board();
-		s = new Scanner(System.in);
-	}
-	*/
+	 * public Game(Player first, Player second) { board = new Board(); s = new
+	 * Scanner(System.in); } a
+	 */
 
 	public Game(String m) { // constructor
 		board = new Board();
@@ -76,21 +74,21 @@ public class Game {
 		}
 
 	}
-	
+
 	public void setMode(String m) {
 		this.mode = m;
 	}
-	
+
 	void getModeFromUser() {
-		String[] modes = {"1p", "2p", "sim"};
+		String[] modes = { "1p", "2p", "sim" };
 		System.out.println("Which mode of game would you like to play?");
-		for (int i=0; i<modes.length; i++) {
+		for (int i = 0; i < modes.length; i++) {
 			System.out.println(i + ": " + modes[i]);
 		}
 		int r = s.nextInt();
-		if (r>0 && r<modes.length) {
+		if (r > 0 && r < modes.length) {
 			setMode(modes[r]);
-			
+
 			if (r == 0) {
 				setP1(new Player('b', 'h'));
 				setP2(new Player('w', 'c'));
@@ -103,188 +101,164 @@ public class Game {
 				setP1(new Player('b', 'c'));
 				setP2(new Player('w', 'c'));
 			}
-			
+
 		}
-		
+
 	}
 
 	public static void main(String[] args) {
-		
+
 		Scanner host = new Scanner(System.in);
-		
+
 		int g = 0;
 		int limit = 1;
-		
-		while (g<limit) {
-		
-		
-		System.out.println("Welcome to Othello!");
-		System.out.println("Which mode would you like to play?");
-		System.out.println("0 for sim, 1 for single player, 2 for two player");
-		
-		
-		String[] modes = {"sim", "1p", "2p"};
-		
-		int mode = host.nextInt();
-		
-		int nSims;
-		
-		if (modes[mode].equals("sim")) {
-			System.out.println("How many simulations?");
-			nSims = host.nextInt();
-			
-		}
-		else {
-			nSims=1;
-		}
-		
-		int[] spreads = new int[nSims];
-		int mean;
-		int tot=0;
-			
-			
-			for (int i=0; i<nSims; i++) {
+
+		while (g < limit) {
+
+			System.out.println("Welcome to Othello!");
+			System.out.println("Which mode would you like to play?");
+			System.out.println("0 for sim, 1 for single player, 2 for two player");
+
+			String[] modes = { "sim", "1p", "2p" };
+
+			int mode = host.nextInt();
+
+			int nSims;
+			try {
+				String k = modes[mode];
+			}
+			catch(ArrayIndexOutOfBoundsException e) {
+				System.out.println("0 for sim, 1 for single player, 2 for two player");
+				 mode = host.nextInt();
+			}
+			if (modes[mode].equals("sim")) {
+				System.out.println("How many simulations?");
+				nSims = host.nextInt();
+
+			} else {
+				nSims = 1;
+			}
+
+			int[] spreads = new int[nSims];
+			int mean;
+			int tot = 0;
+
+			for (int i = 0; i < nSims; i++) {
 				Game game = new Game(modes[mode]);
 				game.getBoard().fillBoard();
 				game.getBoard().start();
-				
+
 				if (game.getMode() != "sim") {
 					game.getBoard().displayBoard();
 				}
 
-				
 				Player currPlayer = game.getP1();
 
 				while (!game.gameIsOver()) {
-					
-					if (game.getBasePieces(currPlayer).length==0) {
+
+					if (game.getBasePieces(currPlayer).length == 0) {
 						System.out.println(currPlayer.getColor() + " has no base pieces!");
 						System.out.println(currPlayer.getColor() + " passes because they have no move!");
 						currPlayer = game.getOtherPlayer(currPlayer);
 					}
-					
+
 					game.conductMove(currPlayer);
-					
-					
+
 					currPlayer = game.getOtherPlayer(currPlayer);
-					
 
 				}
-				
+
 				game.showScore();
 				game.detWinner();
-				
+
 				spreads[i] = game.getSpread();
-				tot+=spreads[i];
-				
+				tot += spreads[i];
+
 			}
-			
-			mean=tot/nSims;
+
+			mean = tot / nSims;
 			if (nSims != 1) {
 				System.out.println("The mean spread is " + mean);
-				
+
 				int stDev;
-				int varTot=0;
-				for (int i=0; i<nSims; i++) {
-					varTot+=Math.pow(spreads[i]-mean, 2);
+				int varTot = 0;
+				for (int i = 0; i < nSims; i++) {
+					varTot += Math.pow(spreads[i] - mean, 2);
 				}
-				stDev = (int)Math.sqrt(varTot/nSims);
+				stDev = (int) Math.sqrt(varTot / nSims);
 				System.out.println("The standard deviation is " + stDev);
-				
-			}
-			else {
+
+			} else {
 				System.out.println("The spread is " + mean);
 			}
-			
+
 			System.out.println();
-			
+
 			System.out.println("Spread: | Occurences: ");
-			
-			for (int i = -64; i<64; i++) {
-				int counter=0;
+
+			for (int i = -64; i < 64; i++) {
+				int counter = 0;
 				for (int j = 0; j < spreads.length; j++) {
 					if (spreads[j] == i) {
 						counter++;
 					}
 				}
 				if (counter != 0) {
-				//	System.out.println("Spread: " + i + " | " + counter + " games");
-					System.out.println(i+ "\t" + counter);
+					// System.out.println("Spread: " + i + " | " + counter + " games");
+					System.out.println(i + "\t" + counter);
 				}
 			}
-			
-			
-			
+
 			System.out.println("Would you like to play again. Give me a 1 for yes, any other number for no");
-			
+
 			int resp = host.nextInt();
-			
+
 			if (resp == 1) {
 				limit++;
 			}
-			
+
 			g++;
-			
+
 		}
-		
-		
-		
+
 		System.out.println("Thanks for playing Othello. Re-run the program if you want to start over from this point.");
-			
-			
-			
-			/*
-			System.out.println("Congratulations, game number " + i + " has concluded!");
-			System.out.println("Spread of game " + i + ": " + game.getSpread());
-			
-			spreads[i] = game.getSpread();
 
-		}
-		*/
 		/*
-		int[] occurencesOfEachSpread= new int [129]; 
-		
-		for (int i = 0; i < numGames; i++) {
-			System.out.println(spreads[i]);
-		}
-		*/
-		
-			/*
-		for (int i = -64; i<64; i++) {
-			int counter=0;
-			for (int j = 0; j < numGames; j++) {
-				if (spreads[j] == i) {
-					counter++;
-				}
-			}
-			if (counter != 0) {
-				System.out.println("Spread: " + i + " | " + counter + " games");
-			}
-		}
-		*/
-		
-		
+		 * System.out.println("Congratulations, game number " + i + " has concluded!");
+		 * System.out.println("Spread of game " + i + ": " + game.getSpread());
+		 * 
+		 * spreads[i] = game.getSpread();
+		 * 
+		 * }
+		 */
+		/*
+		 * int[] occurencesOfEachSpread= new int [129];
+		 * 
+		 * for (int i = 0; i < numGames; i++) { System.out.println(spreads[i]); }
+		 */
+
+		/*
+		 * for (int i = -64; i<64; i++) { int counter=0; for (int j = 0; j < numGames;
+		 * j++) { if (spreads[j] == i) { counter++; } } if (counter != 0) {
+		 * System.out.println("Spread: " + i + " | " + counter + " games"); } }
+		 */
 
 	}
-	
+
 	private void setUp() {
-		
+
 	}
-	
+
 	private void finish() {
-		
+
 	}
-	
-	
-	
+
 	private Player getOtherPlayer(Player p) {
 		if (p == p1) {
 			return p2;
-		}
-		else if (p == p2) {
+		} else if (p == p2) {
 			return p1;
-		}
-		else {
+		} else {
 			return null;
 		}
 	}
@@ -358,27 +332,25 @@ public class Game {
 				}
 			}
 		}
-		int[] ret = new int [2];
+		int[] ret = new int[2];
 		ret[0] = black_pieces;
 		ret[1] = white_pieces;
 		return ret;
-		//System.out.println("Black: " + black_pieces + " / White: " + white_pieces);
+		// System.out.println("Black: " + black_pieces + " / White: " + white_pieces);
 	}
-	
+
 	public void showScore() {
 		int[] scores = getScores();
 		System.out.println("Black: " + scores[0] + " / White: " + scores[1]);
 	}
-	
+
 	public void detWinner() {
 		int[] scores = getScores();
 		if (scores[0] > scores[1]) {
 			System.out.println("Black wins!");
-		}
-		else if (scores[1] > scores[0]) {
+		} else if (scores[1] > scores[0]) {
 			System.out.println("White wins!");
-		}
-		else if (scores[0] == scores[1]) {
+		} else if (scores[0] == scores[1]) {
 			System.out.println("It's a tie!");
 		}
 	}
@@ -524,9 +496,9 @@ public class Game {
 	private void conductMove(Player p) {
 
 		// listTargetPieces(p);
-		
+
 		if (p.getType() != 'c') {
-		System.out.println("It is " + p.getColor() + "'s turn!");
+			System.out.println("It is " + p.getColor() + "'s turn!");
 		}
 
 		displayBasePieces(p);
@@ -560,7 +532,7 @@ public class Game {
 							cleanUpMove(target, i, j);
 						}
 					}
-					
+
 					if (this.getMode() != "sim") {
 						board.displayBoard();
 						showScore();
@@ -578,17 +550,13 @@ public class Game {
 			for (int i = 0; i < 8; i++) {
 				board.getDisk(x, y).setPossibleMove(i, false);
 			}
-			
-			
-			
-			
-			
+
 			// displayScore();
 
 		} else if (canMove(board.getDisk(x, y), p) == false) {
 			System.out.println("Hey, you cannot move that piece!");
 		}
-		
+
 		System.out.println();
 
 	}
@@ -619,47 +587,43 @@ public class Game {
 			}
 		}
 
-		int dir=0;
+		int dir = 0;
 
 		if (p.getType() == 'h') {
-			
-			
+
 			boolean check = false;
-			
+
 			while (check == false) {
 				dir = s.nextInt();
-				for (int i=0; i<directionOptions.length; i++) {
+				for (int i = 0; i < directionOptions.length; i++) {
 					if (dir == directionOptions[i]) {
 						check = true;
 						break;
 					}
 				}
-			
-				if (check == false ) {
-						System.out.println("You can't do that.");
-			
+
+				if (check == false) {
+					System.out.println("You can't do that.");
+
 					System.out.println("Pick one of these directions. Enter the corresponding number.");
 					for (int i = 0; i < directionOptions.length; i++) {
 						System.out.println(directionOptions[i] + ": " + directions[directionOptions[i]]);
 					}
 				}
 			}
-		} 
-		else if (p.getType() == 'c') {
-			int choice = (int)(Math.random()*directionOptions.length);
+		} else if (p.getType() == 'c') {
+			int choice = (int) (Math.random() * directionOptions.length);
 			dir = directionOptions[choice];
-		} 
-		
-		/*
-		else {
-			dir = s.nextInt();
 		}
-		*/
+
 		/*
-		if (p.getType() == 'h') {
-			System.out.println("You have chosen to move in the " + directions[dir] + " direction.");
-		}
-		*/
+		 * else { dir = s.nextInt(); }
+		 */
+		/*
+		 * if (p.getType() == 'h') {
+		 * System.out.println("You have chosen to move in the " + directions[dir] +
+		 * " direction."); }
+		 */
 
 		return dirToDxDy(dir);
 
@@ -814,8 +778,9 @@ public class Game {
 
 	private int[] getBaseFromUser(Player p) {
 		if (p.getType() == 'h') {
-			//System.out.println("It is " + p.getColor() + "\'s turn");
-			System.out.println(p.getColor() + ", which disk would you like to move from?\nGive me a number listed above.");
+			// System.out.println("It is " + p.getColor() + "\'s turn");
+			System.out.println(
+					p.getColor() + ", which disk would you like to move from?\nGive me a number listed above.");
 		}
 
 		Disk[] basePieces = getBasePieces(p);
@@ -831,17 +796,16 @@ public class Game {
 
 			else if (p.getType() == 'c') {
 				// n=0; //code this to make random, not always pick zero
-				n = (int)( Math.random() * (size-1));
-				while (n<0 || n>size-1) {
-					n = (int)( Math.random() * (size-1));
+				n = (int) (Math.random() * (size - 1));
+				while (n < 0 || n > size - 1) {
+					n = (int) (Math.random() * (size - 1));
 				}
 
 			}
 
 			if (n < 0 || n > size - 1) {
 				System.out.println("Hey. That's not an option! Give me one of the numbers listed above!");
-			} 
-			else if (n >= 0 && n < size) {
+			} else if (n >= 0 && n < size) {
 				q = true;
 			}
 		}
@@ -849,11 +813,9 @@ public class Game {
 		Disk b = basePieces[n];
 
 		/*
-		  if (p.getType()=='c') {
-			  System.out.println("Computer player chooses: " + b);
-		  }
-		  */
-		
+		 * if (p.getType()=='c') { System.out.println("Computer player chooses: " + b);
+		 * }
+		 */
 
 		int[] base = { b.getX(), b.getY() };
 		return base;
